@@ -1,3 +1,4 @@
+import { tick } from '@angular/core/testing';
 import {
   ComponentFixture,
   fakeAsync,
@@ -87,28 +88,26 @@ describe('HomeComponent', () => {
     expect(tabs.length).toBe(2, 'Unexpected number of tabs found');
   });
 
-  it('should display advanced courses when tab clicked', (done: DoneFn) => {
+  it('should display advanced courses when tab clicked', fakeAsync(() => {
     coursesService.findAllCourses.and.returnValue(of(setupCourses()));
 
     fixture.detectChanges();
 
     const tabs = el.queryAll(By.css('.mat-tab-label'));
+
     click(tabs[1]);
 
     fixture.detectChanges();
 
-    setTimeout(() => {
-      const cardTitles = el.queryAll(By.css('.mat-card-title'));
+    // tick(500); <- we can use tick but we need to know the time
+    flush();
 
-      expect(cardTitles.length).toBeGreaterThan(
-        0,
-        'Could not find card titles'
-      );
-      expect(cardTitles[0].nativeElement.textContent).toContain(
-        'Angular Testing Course'
-      );
+    const cardTitles = el.queryAll(By.css('.mat-card-title'));
 
-      done();
-    }, 500);
-  });
+    expect(cardTitles.length).toBeGreaterThan(0, 'Could not find card titles');
+
+    expect(cardTitles[0].nativeElement.textContent).toContain(
+      'Angular Testing Course'
+    );
+  }));
 });
